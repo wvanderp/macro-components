@@ -1,14 +1,16 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renders 1`] = `
-<div>
+exports[`macro-components > basic functionality > renders with correct structure 1`] = `
+<div
+  data-testid="card"
+>
   <h1>
     Hello
   </h1>
 </div>
 `;
 
-exports[`returns a component with React components 1`] = `
+exports[`macro-components > component composition > correctly composes with React components 1`] = `
 <div>
   <h2>
     Hello
@@ -18,3 +20,7 @@ exports[`returns a component with React components 1`] = `
   </div>
 </div>
 `;
+
+exports[`macro-components > error handling > handles missing children gracefully 1`] = `<div />`;
+
+exports[`macro-components > error handling > throws error for invalid child components 1`] = `[TypeError: Cannot read properties of undefined (reading 'macroName')]`;

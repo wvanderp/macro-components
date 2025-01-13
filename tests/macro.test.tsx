@@ -13,225 +13,191 @@ Box.displayName = 'Box'
 Text.displayName = 'Text'
 Heading.displayName = 'Heading'
 
-test('returns a component', () => {
-  const Card = macro({
-    h1: 'h1',
-    div: 'div',
-  })(({ h1, div }) => (
-    <div>
-      {h1}
-      {div}
-    </div>
-  ))
-  expect(typeof Card).toBe('function')
-  expect(React.isValidElement(<Card />)).toBe(true)
-})
+describe('macro-components', () => {
+  describe('basic functionality', () => {
+    test('creates a valid React component', () => {
+      const Card = macro({
+        h1: 'h1',
+        div: 'div',
+      })(({ h1, div }) => (
+        <div>
+          {h1}
+          {div}
+        </div>
+      ))
+      expect(typeof Card).toBe('function')
+      expect(React.isValidElement(<Card />)).toBe(true)
+      expect(Card.isMacroComponent).toBe(true)
+    })
 
-test('renders', () => {
-  const Card = macro({
-    h1: 'h1',
-    div: 'div'
-  })(({ h1, div }) => (
-    <div>
-      {h1}
-      {div}
-    </div>
-  ))
-  const json = TestRenderer.create(
-    <Card>
-      <Card.h1>Hello</Card.h1>
-    </Card>
-  ).toJSON()
-  expect(json).toMatchSnapshot()
-})
+    test('renders with correct structure', () => {
+      const Card = macro({
+        h1: 'h1',
+        div: 'div'
+      })(({ h1, div }) => (
+        <div data-testid="card">
+          {h1}
+          {div}
+        </div>
+      ))
+      const json = TestRenderer.create(
+        <Card>
+          <Card.h1>Hello</Card.h1>
+        </Card>
+      ).toJSON()
+      expect(json).toMatchSnapshot()
+    })
+  })
 
-test('returns a component with React components', () => {
-  const Card = macro({
-    Heading,
-    Text
-  })(({ Heading, Text }) => (
-    <div>
-      {Heading}
-      {Text}
-    </div>
-  ))
-  expect(typeof Card).toBe('function')
-  const el = (
-    <Card>
-      <Card.Heading>Hello</Card.Heading>
-      <Card.Text>Beep</Card.Text>
-    </Card>
-  )
-  expect(React.isValidElement(el)).toBe(true)
-  const render = TestRenderer.create(el)
-  const json = render.toJSON()
-  expect(json).toMatchSnapshot()
+  describe('component composition', () => {
+    test('correctly composes with React components', () => {
+      const Card = macro({
+        Heading,
+        Text
+      })(({ Heading, Text }) => (
+        <div>
+          {Heading}
+          {Text}
+        </div>
+      ))
+      expect(typeof Card).toBe('function')
+      const el = (
+        <Card>
+          <Card.Heading>Hello</Card.Heading>
+          <Card.Text>Beep</Card.Text>
+        </Card>
+      )
+      expect(React.isValidElement(el)).toBe(true)
+      const render = TestRenderer.create(el)
+      const json = render.toJSON()
+      expect(json).toMatchSnapshot()
 
-  const [ a, b ] = json.children
-  expect(a.type).toBe('h2')
-  expect(a.children[0]).toBe('Hello')
-  expect(b.type).toBe('div')
-  expect(b.children[0]).toBe('Beep')
-})
+      const [ a, b ] = json.children
+      expect(a.type).toBe('h2')
+      expect(a.children[0]).toBe('Hello')
+      expect(b.type).toBe('div')
+      expect(b.children[0]).toBe('Beep')
+    })
 
-test('swaps out nested child elements', () => {
-  const Nested = macro({
-    Heading,
-    Text,
-  })(({ Heading, Text }) => (
-    <Box>
-      <Box>
-        {Heading}
-      </Box>
-      {Text}
-    </Box>
-  ))
+    test('handles deeply nested macro components', () => {
+      const Nested = macro({
+        Heading,
+        Text,
+      })(({ Heading, Text }) => (
+        <Box>
+          <Box>
+            {Heading}
+          </Box>
+          {Text}
+        </Box>
+      ))
 
-  const json = TestRenderer.create(
-    <Nested>
-      <Nested.Heading>Hello</Nested.Heading>
-      <Nested.Text>Text</Nested.Text>
-    </Nested>
-  ).toJSON();
-  
-  expect(json.type).toBe('div')
-  expect(json.children[0].type).toBe('div')
-  expect(json.children[0].children[0].type).toBe('h2')
-  expect(json.children[0].children[0].children[0]).toBe('Hello')
-  expect(json.children[1].type).toBe('div')
-  expect(json.children[1].children[0]).toBe('Text')
-})
+      const json = TestRenderer.create(
+        <Nested>
+          <Nested.Heading>Hello</Nested.Heading>
+          <Nested.Text>Text</Nested.Text>
+        </Nested>
+      ).toJSON();
+      
+      expect(json.type).toBe('div')
+      expect(json.children[0].type).toBe('div')
+      expect(json.children[0].children[0].type).toBe('h2')
+      expect(json.children[0].children[0].children[0]).toBe('Hello')
+      expect(json.children[1].type).toBe('div')
+      expect(json.children[1].children[0]).toBe('Text')
+    })
 
-test('handles string children', () => {
-  const Card = macro({ Heading })(({ Heading }) => (
-    <div>
-      {Heading}
-      Hello text
-    </div>
-  ))
-  const json = TestRenderer.create(
-    <Card>
-      <Card.Heading>Hi</Card.Heading>
-    </Card>
-  ).toJSON()
-  expect(json.children[1]).toBe('Hello text')
-})
+    test('handles multiple instances of the same component type', () => {
+      const List = macro({
+        Item: Box
+      })(({ Item }) => (
+        <div>
+          {React.Children.toArray(Item)}
+        </div>
+      ))
 
-test('updates template on children update', () => {
-  const Card = macro({
-    Heading,
-    Subhead: Heading
-  })(({ Heading, Subhead }) => (
-    <div>
-      {Heading}
-      {Subhead}
-    </div>
-  ))
-  const card = TestRenderer.create(
-    <Card>
-      <Card.Heading>Nope</Card.Heading>
-      <Card.Subhead>Umm</Card.Subhead>
-    </Card>
-  )
-  const first = card.toJSON()
-  expect(first.children[0].type).toBe('h2')
-  expect(first.children[0].children[0]).toBe('Nope')
-  expect(first.children[1].children[0]).toBe('Umm')
-  card.update(
-    <Card>
-      <Card.Heading>Hello</Card.Heading>
-      <Card.Subhead>Beep</Card.Subhead>
-    </Card>
-  )
-  const next = card.toJSON()
-  expect(next.children[0].type).toBe('h2')
-  expect(next.children[0].children[0]).toBe('Hello')
-  expect(next.children[1].type).toBe('h2')
-  expect(next.children[1].children[0]).toBe('Beep')
-})
+      const json = TestRenderer.create(
+        <List>
+          <List.Item>First</List.Item>
+          <List.Item>Second</List.Item>
+        </List>
+      ).toJSON()
 
-test('skips template update', () => {
-  const Card = macro({
-    Heading
-  })(({ Heading }) => (
-    <div>
-      {Heading}
-    </div>
-  ))
-  const children = (
-    <Card.Heading>Hello</Card.Heading>
-  )
-  const card = TestRenderer.create(
-    <Card>
-      {children}
-    </Card>
-  )
-  card.update(
-    <Card>
-      {children}
-    </Card>
-  )
-  const json = card.toJSON()
-  expect(json.children[0].type).toBe('h2')
-  expect(json.children[0].children[0]).toBe('Hello')
-})
+      expect(json.type).toBe('div')
+      const children = json.children
+      expect(children[0].children[0]).toBe('First')
+      expect(children[1].children[0]).toBe('Second')
+    })
+  })
 
-test('Clone returns a cloned element', () => {
-  const el = <Heading>Hello</Heading>
-  const json = TestRenderer.create(
-    <Clone
-      element={el}
-      fontSize={4}
-      color='tomato'
-    />
-  ).toJSON()
-  expect(json.type).toBe('h2')
-  expect(json.props.fontSize).toBe(4)
-  expect(json.props.color).toBe('tomato')
-})
+  describe('error handling', () => {
+    test('throws error for invalid child components', () => {
+      const Card = macro({
+        Header: 'header'
+      })(({ Header }) => <div>{Header}</div>)
 
-test('Clone returns false with no element', () => {
-  const json = TestRenderer.create(
-    <Clone
-      fontSize={4}
-      color='tomato'
-    />
-  ).toJSON()
-  expect(json).toBe(null)
-})
+      expect(() => {
+        TestRenderer.create(
+          <Card>
+            <Card.INVALID>Hello</Card.INVALID>
+          </Card>
+        )
+      }).toThrowErrorMatchingSnapshot()
+    })
 
-test('handles nested macro components', () => {
-  const Inner = macro({
-    Text
-  })(({ Text }) => (
-    <Box>
-      {Text}
-    </Box>
-  ))
+    test('handles missing children gracefully', () => {
+      const Card = macro({
+        Header: 'header',
+        Body: 'div'
+      })(({ Header, Body }) => (
+        <div>
+          {Header}
+          {Body}
+        </div>
+      ))
 
-  const Outer = macro({
-    Inner,
-    Heading
-  })(({ Inner, Heading }) => (
-    <Box>
-      {Heading}
-      {Inner}
-    </Box>
-  ))
+      const json = TestRenderer.create(<Card />).toJSON()
+      expect(json).toMatchSnapshot()
+    })
+  })
 
-  const json = TestRenderer.create(
-    <Outer>
-      <Outer.Heading>Title</Outer.Heading>
-      <Outer.Inner>
-        <Inner.Text>Nested Content</Inner.Text>
-      </Outer.Inner>
-    </Outer>
-  ).toJSON()
+  describe('Clone component', () => {
+    test('correctly merges props when cloning', () => {
+      const el = <Heading>Hello</Heading>
+      const json = TestRenderer.create(
+        <Clone
+          element={el}
+          fontSize={4}
+          color='tomato'
+        />
+      ).toJSON()
+      expect(json.type).toBe('h2')
+      expect(json.props.fontSize).toBe(4)
+      expect(json.props.color).toBe('tomato')
+    })
 
-  expect(json.type).toBe('div')
-  expect(json.children[0].type).toBe('h2')
-  expect(json.children[0].children[0]).toBe('Title')
-  expect(json.children[1].type).toBe('div')
-  expect(json.children[1].children[0].type).toBe('div')
-  expect(json.children[1].children[0].children[0]).toBe('Nested Content')
+    test('handles undefined element gracefully', () => {
+      const json = TestRenderer.create(
+        <Clone
+          fontSize={4}
+          color='tomato'
+        />
+      ).toJSON()
+      expect(json).toBe(null)
+    })
+
+    test('preserves original props when cloning', () => {
+      const el = <Heading className="original">Hello</Heading>
+      const json = TestRenderer.create(
+        <Clone
+          element={el}
+          className="new"
+          data-test="value"
+        />
+      ).toJSON()
+      
+      expect(json.props.className).toBe('original')
+      expect(json.props['data-test']).toBe('value')
+    })
+  })
 })

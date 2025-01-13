@@ -48,7 +48,7 @@ const Text = sys(
 const Heading = sys({
   is: 'h2',
   m: 0,
-  fontSize: [ 5, 6 ],
+  fontSize: [5, 6],
   lineHeight: 1.125,
   fontWeight: 'bold'
 },
@@ -80,42 +80,39 @@ const Container = sys({
   mx: 'auto'
 }, 'max-width: 1024px;')
 
-const Header = macro({
-  Heading,
-  Subhead,
-  Pre
-}, ({
-  Heading,
-  Subhead,
-  Pre,
-}, {
-  bg = 'seafoam'
-}) => (
-  <Box
-    bg={bg}
-    color='text'
-    px={3}
-    py={[ 4, 5 ]}>
-    <Container>
-      <Flex wrap>
-        <Box width={[ 1, 1, 2/3 ]}>
-          <Clone
-            element={Heading}
-            mb={2}
-          />
-          {Subhead}
-        </Box>
-        <Box mx='auto' />
-        <Box>
-          <Clone
-            element={Pre}
-            py={3}
-          />
-        </Box>
-      </Flex>
-    </Container>
-  </Box>
-))
+const Header = macro({ 
+  Heading, 
+  Subhead, 
+  Pre 
+})((elements, props) => {
+  const { bg = 'seafoam' } = props
+  return (
+    <Box
+      bg={bg}
+      color='text'
+      px={3}
+      py={[4, 5]}>
+      <Container>
+        <Flex wrap>
+          <Box width={[1, 1, 2 / 3]}>
+            <Clone
+              element={elements.Heading}
+              mb={2}
+            />
+            {elements.Subhead}
+          </Box>
+          <Box mx='auto' />
+          <Box>
+            <Clone
+              element={elements.Pre}
+              py={3}
+            />
+          </Box>
+        </Flex>
+      </Container>
+    </Box>
+  )
+})
 
 const space = [
   0, 4, 8, 16, 32, 64, 128, 256
