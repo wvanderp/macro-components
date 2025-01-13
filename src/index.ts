@@ -33,6 +33,7 @@ const convertToComponentsMap = (
     acc[key] = typeof value === 'string'
       ? (props: any) => React.createElement(value, props)
       : value
+    acc[key].macroName = key
     return acc
   }, {} as ComponentsMap)
 }
@@ -68,11 +69,15 @@ export const macro = <T extends ComponentsMap>(
           const children = React.Children.toArray(props.children)
           for (const child of children) {
             const element = child as ReactElement
-            const key = element.type.macroName || element.type
-            if (componentKeys.includes(key)) continue
-            throw new Error(
-              `Invalid child component. Must be one of: ${componentKeys.join(', ')}`
-            )
+            if (!element || !element.type) {
+              throw new Error(`Invalid child component: received ${element}. Must be a valid React element.`)
+            }
+            const key = typeof element.type === 'function' ? element.type.macroName : element.type
+            if (!key || !componentKeys.includes(key)) {
+              throw new Error(
+                `Invalid child component: ${element.type}. Must be one of: ${componentKeys.join(', ')}`
+              )
+            }
           }
           return null
         }
@@ -92,7 +97,15 @@ export const macro = <T extends ComponentsMap>(
         return React.Children.toArray(children)
           .reduce((acc, child) => {
             const element = child as ReactElement
-            const key = element.type.macroName
+            if (!element || !element.type) {
+              throw new Error(`Invalid child component: received ${element}. Must be a valid React element.`)
+            }
+            const key = typeof element.type === 'function' ? element.type.macroName : element.type
+            if (!key || !componentKeys.includes(key)) {
+              throw new Error(
+                `Invalid child component: ${element.type}. Must be one of: ${componentKeys.join(', ')}`
+              )
+            }
             if (!acc[key]) {
               acc[key] = []
             }

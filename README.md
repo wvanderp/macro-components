@@ -1,10 +1,9 @@
-
 # macro-components
 
 Create flexible layout and composite UI components without the need to define arbitrary custom props.
 
 [![Build Status][build-badge]][build]
-<!-- cant log in so nope
+<!-- can't log in so nope
 [![Coverage][coverage-badge]][coverage]
 -->
 
@@ -38,7 +37,7 @@ Heading.displayName = 'Heading'
 const Text = styled.div`${space} ${fontSize} ${color}`
 Text.displayName = 'Text'
 
-// create a macro function with the UI components you intend to use
+// Create a macro function with the UI components you intend to use
 const macro = Macro({
   Image,
   Heading,
@@ -66,7 +65,7 @@ const MediaObject = macro(({
 ```jsx
 import MediaObject from './MediaObject'
 
-// get the macro component's child components
+// Get the macro component's child components
 const { Image, Heading, Text } = MediaObject
 
 // Use the macro-component by passing the components as children
@@ -121,46 +120,57 @@ then this module is intended for you.
 
 ## Usage
 
-`Macro(componentsObject)(elementFunction)`
+`macro(componentsObject)(elementFunction)`
 
-Returns a React component with a composable API that keeps tree layout structure.
+Returns a React component with a composable API that keeps tree layout structure. The component is fully typed with TypeScript support.
 
-```jsx
-const Banner = Macro({
-  // pass a components object
+```tsx
+const Banner = macro({
+  // Pass a components object
   Heading,
   Subhead
 })(({
-  // the element function receives child elements
+  // The element function receives child elements
   // named according to the components object
   Heading,
-  Subhead
+  Subhead,
+  props
 }) => (
   <Box p={3} color='white' bg='blue'>
     {Heading}
     {Subhead}
   </Box>
-)
+))
 ```
 
-The `elementFunction` argument is called with an object of elements
-based on the `componentsObject` passed to the Macro function.
-Using the Banner component above would look something like the following.
+### Types
 
-```jsx
-import Banner from './Banner'
+The macro component creator is fully typed:
 
-const App = () => (
-  <Banner>
-    <Banner.Heading>Hello</Banner.Heading>
-    <Banner.Subhead>Subhead</Banner.Subhead>
-  </Banner>
-)
+```tsx
+type ComponentsMap = Record<string, React.ComponentType<any>>
+
+type MacroComponentType<T extends ComponentsMap> = React.FC<MacroProps> & {
+  [K in keyof T]: T[K]
+} & {
+  isMacroComponent: boolean
+}
+```
+
+### Template Function
+
+The template function receives an object containing the child elements and the component's props:
+
+```tsx
+type TemplateFunction = (
+  elements: Record<string, ReactElement | undefined>,
+  props: MacroProps
+) => ReactNode
 ```
 
 ### componentsObject
 
-The components object is used to defined which components the macro component will accept as children.
+The components object is used to define which components the macro component will accept as children.
 
 ### elementFunction
 
@@ -170,8 +180,8 @@ The elements object is created from its children and is intended to make encapsu
 Within the macro component, the element function is called with the elements object and props: `elementFunction(elementsObject, props)`.
 
 ```jsx
-// example
-const elFunc = ({ Heading, Text, }, props) => (
+// Example
+const elFunc = ({ Heading, Text }, props) => (
   <header>
     {Heading}
     {Text}
@@ -193,12 +203,12 @@ const SectionHeader = Macro(componentsObj)(elFunc)
 
 For any element not passed as a child to the macro component,
 the element function will render `undefined` and React will not render that element.
-This is useful for conditionally omitting optional children
+This is useful for conditionally omitting optional children.
 
 ```jsx
 const macro = Macro({ Icon, Text, CloseButton })
 
-const Message = macro({
+const Message = macro(({
   Icon,
   Text,
   CloseButton
@@ -209,7 +219,7 @@ const Message = macro({
     <Box mx='auto' />
     {CloseButton}
   </Flex>
-)
+))
 ```
 
 ```jsx
@@ -247,7 +257,7 @@ const Card = macro(({
 ```
 
 ```jsx
-// example usage
+// Example usage
 <Card bg='tomato'>
   <Card.Image src='kittens.png' />
   <Card.Text>Meow</Card.Text>
@@ -319,7 +329,7 @@ The solutions below allow you to pass any arbitrary components as props or child
 See [this discussion](https://github.com/jxnblk/macro-components/issues/3) for more.
 
 ```jsx
-// using custom props
+// Using custom props
 const MyLayout = ({
   left,
   right
@@ -345,9 +355,9 @@ const MyLayout = ({
 ```
 
 ```jsx
-// using ordered children
+// Using ordered children
 const Header = props => {
-  const [ first, second ] = React.Children.toArray(props.children)
+  const [first, second] = React.Children.toArray(props.children)
   return (
     <Box p={3}>
       {first}
@@ -363,7 +373,7 @@ const Header = props => {
 ```
 
 ```jsx
-// using a children object
+// Using a children object
 const Header = ({
   children: {
     left,

@@ -23,4 +23,4 @@ exports[`macro-components > component composition > correctly composes with Reac
 
 exports[`macro-components > error handling > handles missing children gracefully 1`] = `<div />`;
 
-exports[`macro-components > error handling > throws error for invalid child components 1`] = `[TypeError: Cannot read properties of undefined (reading 'macroName')]`;
+exports[`macro-components > error handling > throws error for invalid child components 1`] = `[Error: Invalid child component: received [object Object]. Must be a valid React element.]`;
