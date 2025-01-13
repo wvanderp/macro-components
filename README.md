@@ -3,7 +3,6 @@
 
 Create flexible layout and composite UI components without the need to define arbitrary custom props.
 
-
 [![Build Status][build-badge]][build]
 <!-- cant log in so nope
 [![Coverage][coverage-badge]][coverage]
@@ -11,10 +10,8 @@ Create flexible layout and composite UI components without the need to define ar
 
 [build-badge]: https://img.shields.io/travis/jxnblk/macro-components/master.svg?style=flat-square
 [build]: https://travis-ci.org/jxnblk/macro-components
-[coverage-badge]: https://img.shields.io/codecov/c/github/jxnblk/macro-components.svg?style=flat-square
-[coverage]: https://codecov.io/github/jxnblk/macro-components
 
-```
+```bash
 npm i macro-components
 ```
 

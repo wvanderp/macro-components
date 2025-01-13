@@ -4,13 +4,12 @@
   "description": "Create flexible layout and composite UI components without the need to define arbitrary custom props.",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "babel src -d dist",
-    "start": "x0 dev docs/App.js -o",
-    "docs": "x0 build docs/App.js --static --cssLibrary='styled-components' -d docs",
+    "prepublish": "babel src -d dist --extensions \".ts,.tsx,.js,.jsx\"",
+    "start": "vite docs/App.js",
     "cover": "nyc report --reporter=html --reporter=lcov > coverage.lcov && codecov",
     "bench": "babel-node benchmarks/index.js",
     "size": "npm run prepublish && bundlesize",
-    "test": "nyc ava"
+    "test": "ava tests/test.tsx"
   },
   "keywords": [
     "react",
@@ -23,13 +22,16 @@
   "author": "Brent Jackson",
   "license": "MIT",
   "devDependencies": {
-    "@compositor/x0": "^3.0.4",
-    "ava": "^0.23.0",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "babel-register": "^6.26.0",
+    "@ava/babel": "^2.0.0",
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@babel/register": "^7.25.9",
+    "@types/react": "^16.0.0",
+    "@types/react-test-renderer": "^19.0.0",
+    "ava": "^6.2.0",
     "benchmark": "^2.1.4",
     "bundlesize": "^0.15.3",
     "codecov": "^3.0.0",
@@ -41,13 +43,23 @@
     "sinon": "^4.2.2",
     "styled-components": "^2.2.3",
     "styled-system": "^1.0.8",
-    "system-components": "^1.1.1"
+    "system-components": "^1.1.1",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.0"
   },
   "ava": {
     "require": [
-      "babel-register"
+      "./test-setup.js"
     ],
-    "babel": "inherit"
+    "extensions": [
+      "ts",
+      "tsx"
+    ],
+    "nodeArguments": [
+      "--import=tsx"
+    ]
   },
   "bundlesize": [
     {

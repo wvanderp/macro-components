@@ -1,9 +1,8 @@
 import test from 'ava'
 import React from 'react'
-import TestRenderer, { create as render } from 'react-test-renderer'
-import util from 'util'
-import sinon from 'sinon'
-import macro, { Clone } from './src'
+import TestRenderer from 'react-test-renderer'
+
+import macro, { Clone } from '../src'
 
 const Box = props => <div {...props} />
 const Text = props => <div {...props} />
@@ -38,7 +37,7 @@ test('renders', t => {
       {div}
     </div>
   ))
-  const json = render(
+  const json = TestRenderer.create(
     <Card>
       <Card.h1>Hello</Card.h1>
     </Card>
@@ -64,8 +63,10 @@ test('returns a component with React components', t => {
     </Card>
   )
   t.true(React.isValidElement(el))
-  const json = render(el).toJSON()
+  const render = TestRenderer.create(el)
+  const json = render.toJSON()
   t.snapshot(json)
+
   const [ a, b ] = json.children
   t.is(a.type, 'h2')
   t.is(a.children[0], 'Hello')
@@ -85,12 +86,16 @@ test('swaps out nested child elements', t => {
       {Text}
     </Box>
   ))
-  const json = render(
+
+  const json = TestRenderer.create(
     <Nested>
       <Nested.Heading>Hello</Nested.Heading>
       <Nested.Text>Text</Nested.Text>
     </Nested>
-  ).toJSON()
+  ).toJSON();
+  
+  t.is(json.type, 'div')
+  t.is(json.children[0].type, 'div')
   t.is(json.children[0].children[0].type, 'h2')
   t.is(json.children[0].children[0].children[0], 'Hello')
   t.is(json.children[1].type, 'div')
@@ -104,7 +109,7 @@ test('handles string children', t => {
       Hello text
     </div>
   ))
-  const json = render(
+  const json = TestRenderer.create(
     <Card>
       <Card.Heading>Hi</Card.Heading>
     </Card>
@@ -173,7 +178,7 @@ test('skips template update', t => {
 
 test('Clone returns a cloned element', t => {
   const el = <Heading>Hello</Heading>
-  const json = render(
+  const json = TestRenderer.create(
     <Clone
       element={el}
       fontSize={4}
@@ -186,7 +191,7 @@ test('Clone returns a cloned element', t => {
 })
 
 test('Clone returns false with no element', t => {
-  const json = render(
+  const json = TestRenderer.create(
     <Clone
       fontSize={4}
       color='tomato'
