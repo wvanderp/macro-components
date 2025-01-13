@@ -1,4 +1,4 @@
-import test from 'ava'
+import { describe, test, expect } from 'vitest'
 import React from 'react'
 import TestRenderer from 'react-test-renderer'
 
@@ -13,7 +13,7 @@ Box.displayName = 'Box'
 Text.displayName = 'Text'
 Heading.displayName = 'Heading'
 
-test('returns a component', t => {
+test('returns a component', () => {
   const Card = macro({
     h1: 'h1',
     div: 'div',
@@ -23,11 +23,11 @@ test('returns a component', t => {
       {div}
     </div>
   ))
-  t.is(typeof Card, 'function')
-  t.true(React.isValidElement(<Card />))
+  expect(typeof Card).toBe('function')
+  expect(React.isValidElement(<Card />)).toBe(true)
 })
 
-test('renders', t => {
+test('renders', () => {
   const Card = macro({
     h1: 'h1',
     div: 'div'
@@ -42,10 +42,10 @@ test('renders', t => {
       <Card.h1>Hello</Card.h1>
     </Card>
   ).toJSON()
-  t.snapshot(json)
+  expect(json).toMatchSnapshot()
 })
 
-test('returns a component with React components', t => {
+test('returns a component with React components', () => {
   const Card = macro({
     Heading,
     Text
@@ -55,26 +55,26 @@ test('returns a component with React components', t => {
       {Text}
     </div>
   ))
-  t.is(typeof Card, 'function')
+  expect(typeof Card).toBe('function')
   const el = (
     <Card>
       <Card.Heading>Hello</Card.Heading>
       <Card.Text>Beep</Card.Text>
     </Card>
   )
-  t.true(React.isValidElement(el))
+  expect(React.isValidElement(el)).toBe(true)
   const render = TestRenderer.create(el)
   const json = render.toJSON()
-  t.snapshot(json)
+  expect(json).toMatchSnapshot()
 
   const [ a, b ] = json.children
-  t.is(a.type, 'h2')
-  t.is(a.children[0], 'Hello')
-  t.is(b.type, 'div')
-  t.is(b.children[0], 'Beep')
+  expect(a.type).toBe('h2')
+  expect(a.children[0]).toBe('Hello')
+  expect(b.type).toBe('div')
+  expect(b.children[0]).toBe('Beep')
 })
 
-test('swaps out nested child elements', t => {
+test('swaps out nested child elements', () => {
   const Nested = macro({
     Heading,
     Text,
@@ -94,15 +94,15 @@ test('swaps out nested child elements', t => {
     </Nested>
   ).toJSON();
   
-  t.is(json.type, 'div')
-  t.is(json.children[0].type, 'div')
-  t.is(json.children[0].children[0].type, 'h2')
-  t.is(json.children[0].children[0].children[0], 'Hello')
-  t.is(json.children[1].type, 'div')
-  t.is(json.children[1].children[0], 'Text')
+  expect(json.type).toBe('div')
+  expect(json.children[0].type).toBe('div')
+  expect(json.children[0].children[0].type).toBe('h2')
+  expect(json.children[0].children[0].children[0]).toBe('Hello')
+  expect(json.children[1].type).toBe('div')
+  expect(json.children[1].children[0]).toBe('Text')
 })
 
-test('handles string children', t => {
+test('handles string children', () => {
   const Card = macro({ Heading })(({ Heading }) => (
     <div>
       {Heading}
@@ -114,10 +114,10 @@ test('handles string children', t => {
       <Card.Heading>Hi</Card.Heading>
     </Card>
   ).toJSON()
-  t.is(json.children[1], 'Hello text')
+  expect(json.children[1]).toBe('Hello text')
 })
 
-test('updates template on children update', t => {
+test('updates template on children update', () => {
   const Card = macro({
     Heading,
     Subhead: Heading
@@ -134,9 +134,9 @@ test('updates template on children update', t => {
     </Card>
   )
   const first = card.toJSON()
-  t.is(first.children[0].type, 'h2')
-  t.is(first.children[0].children[0], 'Nope')
-  t.is(first.children[1].children[0], 'Umm')
+  expect(first.children[0].type).toBe('h2')
+  expect(first.children[0].children[0]).toBe('Nope')
+  expect(first.children[1].children[0]).toBe('Umm')
   card.update(
     <Card>
       <Card.Heading>Hello</Card.Heading>
@@ -144,13 +144,13 @@ test('updates template on children update', t => {
     </Card>
   )
   const next = card.toJSON()
-  t.is(next.children[0].type, 'h2')
-  t.is(next.children[0].children[0], 'Hello')
-  t.is(next.children[1].type, 'h2')
-  t.is(next.children[1].children[0], 'Beep')
+  expect(next.children[0].type).toBe('h2')
+  expect(next.children[0].children[0]).toBe('Hello')
+  expect(next.children[1].type).toBe('h2')
+  expect(next.children[1].children[0]).toBe('Beep')
 })
 
-test('skips template update', t => {
+test('skips template update', () => {
   const Card = macro({
     Heading
   })(({ Heading }) => (
@@ -172,11 +172,11 @@ test('skips template update', t => {
     </Card>
   )
   const json = card.toJSON()
-  t.is(json.children[0].type, 'h2')
-  t.is(json.children[0].children[0], 'Hello')
+  expect(json.children[0].type).toBe('h2')
+  expect(json.children[0].children[0]).toBe('Hello')
 })
 
-test('Clone returns a cloned element', t => {
+test('Clone returns a cloned element', () => {
   const el = <Heading>Hello</Heading>
   const json = TestRenderer.create(
     <Clone
@@ -185,17 +185,53 @@ test('Clone returns a cloned element', t => {
       color='tomato'
     />
   ).toJSON()
-  t.is(json.type, 'h2')
-  t.is(json.props.fontSize, 4)
-  t.is(json.props.color, 'tomato')
+  expect(json.type).toBe('h2')
+  expect(json.props.fontSize).toBe(4)
+  expect(json.props.color).toBe('tomato')
 })
 
-test('Clone returns false with no element', t => {
+test('Clone returns false with no element', () => {
   const json = TestRenderer.create(
     <Clone
       fontSize={4}
       color='tomato'
     />
   ).toJSON()
-  t.is(json, null)
+  expect(json).toBe(null)
+})
+
+test('handles nested macro components', () => {
+  const Inner = macro({
+    Text
+  })(({ Text }) => (
+    <Box>
+      {Text}
+    </Box>
+  ))
+
+  const Outer = macro({
+    Inner,
+    Heading
+  })(({ Inner, Heading }) => (
+    <Box>
+      {Heading}
+      {Inner}
+    </Box>
+  ))
+
+  const json = TestRenderer.create(
+    <Outer>
+      <Outer.Heading>Title</Outer.Heading>
+      <Outer.Inner>
+        <Inner.Text>Nested Content</Inner.Text>
+      </Outer.Inner>
+    </Outer>
+  ).toJSON()
+
+  expect(json.type).toBe('div')
+  expect(json.children[0].type).toBe('h2')
+  expect(json.children[0].children[0]).toBe('Title')
+  expect(json.children[1].type).toBe('div')
+  expect(json.children[1].children[0].type).toBe('div')
+  expect(json.children[1].children[0].children[0]).toBe('Nested Content')
 })
