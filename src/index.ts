@@ -1,7 +1,11 @@
 import React, { ReactNode, ReactElement } from 'react'
 
+type BaseMacroComponentType = React.ComponentType<any> & {
+  macroName?: string
+}
+
 /** Map of component names to their React component types */
-type ComponentsMap = Record<string, React.ComponentType<any>>
+type ComponentsMap = Record<string, BaseMacroComponentType>
 
 /** Props interface for Macro components */
 interface MacroProps {
@@ -72,7 +76,9 @@ export const macro = <T extends ComponentsMap>(
             if (!element || !element.type) {
               throw new Error(`Invalid child component: received ${element}. Must be a valid React element.`)
             }
-            const key = typeof element.type === 'function' ? element.type.macroName : element.type
+            const key = typeof element.type === 'function'
+              ? (element.type as BaseMacroComponentType).macroName
+              : element.type
             if (!key || !componentKeys.includes(key)) {
               throw new Error(
                 `Invalid child component: ${element.type}. Must be one of: ${componentKeys.join(', ')}`
@@ -96,11 +102,13 @@ export const macro = <T extends ComponentsMap>(
       private parseChildren(children: ReactNode): Record<string, ReactElement[] | undefined> {
         return React.Children.toArray(children)
           .reduce((acc, child) => {
-            const element = child as ReactElement
+            const element = child as ReactElement;
             if (!element || !element.type) {
               throw new Error(`Invalid child component: received ${element}. Must be a valid React element.`)
             }
-            const key = typeof element.type === 'function' ? element.type.macroName : element.type
+            const key = typeof element.type === 'function'
+              ? (element.type as BaseMacroComponentType).macroName
+              : element.type
             if (!key || !componentKeys.includes(key)) {
               throw new Error(
                 `Invalid child component: ${element.type}. Must be one of: ${componentKeys.join(', ')}`
